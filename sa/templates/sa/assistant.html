@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Assistant</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", Arial, Helvetica, sans-serif}
+@media (min-width: 801px){
+    .w3-container {
+        position:absolute;
+        top: 50%;
+        left:50%;
+        width: 40%;
+        margin: -20% 0 0 -20%;
+    }
+}
+
+@media (max-width: 800px){
+    .w3-container{
+        position:absolute;
+        top: 50%;
+        width: 100%;
+        margin-top: -20%;
+    }
+}
+</style>
+</head>
+<body class="w3-light-grey">
+    <div class="w3-container w3-white w3-padding-16">
+        <form action="{% url 'sa:execute_query' user_id %}" method="post">
+            {% csrf_token %}
+            <fieldset>
+                <legend><h1>Your query: </h1></legend>
+                <textarea class="w3-input w3-border" name="query"></textarea>
+            </fieldset>
+            <input class="w3-button w3-dark-grey" type="submit" value="Execute query">
+        </form>
+        {% if query %}
+        <p> > <i>{{ query }}</i></p>
+        {% endif %}
+        {% if message %}
+        <p> > <b>{{ message }}</b></p>
+        {% endif %}
+    </div>
+</body>

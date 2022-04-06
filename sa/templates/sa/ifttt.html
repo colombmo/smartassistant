@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>IFTTT Rule</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", Arial, Helvetica, sans-serif}
+@media (min-width: 801px){
+    .w3-container {
+        position:absolute;
+        top: 50%;
+        left:50%;
+        width: 40%;
+        margin: -20% 0 0 -20%;
+    }
+}
+
+@media (max-width: 800px){
+    .w3-container{
+        position:absolute;
+        top: 50%;
+        width: 100%;
+        margin-top: -20%;
+    }
+}
+
+input {
+  vertical-align: middle;
+  margin: 5px 10px 5px 0;
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+</style>
+<script type="text/javascript">
+    units = {
+        {% for actuator in actuators %}
+            "{{ actuator.id }}" : "{{ actuator.units }}",
+        {% endfor %}
+    }
+
+    function change_units(){
+        var x = document.getElementById("mySelect").value;
+        console.log(x)
+        document.getElementById("units").innerHTML = units[x];
+    }
+</script>
+</head>
+<body class="w3-light-grey">
+    <div class="w3-container w3-white w3-padding-16">
+        <form action="{% url 'sa:add_ifttt' user_id %}" method="post">
+        {% csrf_token %}
+        <fieldset>
+            <legend><h1>New IFTTT rule</h1></legend>
+            {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+            <h2>IF say : </h2>
+            <textarea class="w3-input w3-border" name="this" required></textarea>
+            <h2>THEN : </h2>
+            <a> set </a><select class="w3-input w3-border" id="mySelect" onchange="change_units()" name="actuator" required>
+                <option value="" selected disabled hidden>Choose here</option>
+                {% for actuator in actuators %}
+                    <option value="{{ actuator.id }}">{{ actuator }}</option>
+                {% endfor %}
+            </select>
+            <a> value to    </a>
+            <input style="width:100px;" name="value" type="number" required></input>   <a id="units"></a>
+        </fieldset>
+        <input class="w3-button w3-dark-grey" type="submit" value="Save rule">
+        </form>
+        {% if rule %}
+        <p>Rule: "<b>{{ rule }}</b>" successfully added!</p>
+        {% endif %}
+    </div>
+</body>
