@@ -1,0 +1,1 @@
+~/.virtualenvs/smartassistant/bin/python manage.py runserver 127.0.0.1:62130 --settings=config.settings.local
