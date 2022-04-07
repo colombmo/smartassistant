@@ -11,7 +11,8 @@ from scipy import spatial
 import spacy
 
 nlp = spacy.load('en_core_web_sm',disable=['ner','textcat'])
-model_sbert = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
+# model_sbert = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
+model_sbert = SentenceTransformer('microsoft/MiniLM-L12-H384-uncased')
 
 # Create your views here.
 def index(request):
