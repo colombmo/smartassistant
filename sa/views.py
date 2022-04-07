@@ -12,7 +12,7 @@ import spacy
 
 nlp = spacy.load('en_core_web_sm',disable=['ner','textcat'])
 # model_sbert = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
-model_sbert = SentenceTransformer('microsoft/MiniLM-L12-H384-uncased')
+model_sbert = SentenceTransformer('all-MiniLM-L12-v2')
 
 # Create your views here.
 def index(request):
