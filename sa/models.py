@@ -28,12 +28,13 @@ class Actuator(models.Model):
 	
 # This
 class This(models.Model):
+	originalcommand = models.CharField(max_length=1000)
 	command = models.CharField(max_length=1000)
 	variable = models.CharField(max_length=100)
 	category = models.CharField(max_length=100)
 	
 	def __str__(self):
-		return self.command
+		return self.originalcommand
 
 # That
 class That(models.Model):
