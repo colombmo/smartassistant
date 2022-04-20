@@ -20,31 +20,39 @@ def index(request):
     return HttpResponse("Hello. You're at the smart assistant index.")
 
 
-def ifttt(request, rule = None):
-    user_id = request.COOKIES.get("Django_test_cookie")
-
-    if user_id is None:
-        # Cookie is not set, set it to random user ID
-        user_id = uuid.uuid4()
+def ifttt(request, rule = None, user_id = None):
+    new_id = False
+    if user_id == None:
+        user_id = request.COOKIES.get("Django_test_cookie")
+        if user_id is None:
+            # Cookie is not set, set it to random user ID
+            new_id = True
+            user_id = uuid.uuid4()
 
     actuators = Actuator.objects.all()
 
     context = {"user_id" : user_id, "actuators" : actuators, "rule": rule}
     response = render(request, "sa/ifttt.html", context)
-    response.set_cookie("Django_test_cookie", user_id)
+    
+    if new_id:
+        response.set_cookie("Django_test_cookie", user_id)
 
     return response
 
-def assistant(request, type = "A", query = None, message = None):
-    user_id = request.COOKIES.get("Django_test_cookie")
+def assistant(request, typ = "A", user_id = None, query = None, message = None):
+    new_id = False
+    if user_id == None:
+        user_id = request.COOKIES.get("Django_test_cookie")
+        if user_id is None:
+            # Cookie is not set, set it to random user ID
+            new_id = True
+            user_id = uuid.uuid4()
 
-    if user_id is None:
-        # Cookie is not set, set it to random user ID
-        user_id = uuid.uuid4()
-
-    context = {"user_id" : user_id, "message": message, "query": query, "type": type}
+    context = {"user_id" : user_id, "message": message, "query": query, "typ": typ}
     response = render(request, "sa/assistant.html", context)
-    response.set_cookie("Django_test_cookie", user_id)
+    
+    if new_id:
+        response.set_cookie("Django_test_cookie", user_id)
 
     return response
 
@@ -82,9 +90,9 @@ def add_ifttt(request, user_id):
 
     return ifttt(request, f"IF SAY '{this_sentence}' THEN SET {act} to {that_value} {act.units}")
 
-def execute_query(request, user_id, type="A"):
+def execute_query(request, typ = "A", user_id=None):
     # If the query has been done to the assistant A (the fuzzy one!)
-    if type == "A":
+    if typ == "A":
         query = request.POST["query"]
 
         # Tokenize and find POS
@@ -125,7 +133,7 @@ def execute_query(request, user_id, type="A"):
             # If no matching category, return error and let user repeat the query
             if maxi[1] < 0.5:
                 # Return message unknown command and let try another query
-                return assistant(request, type = type, query = query, message = "Unknown query, please try with another wording.")
+                return assistant(request, typ = typ, query = query, message = "Unknown query, please try with another wording.")
 
         # Precisiate the word from the ground truth and that from the query
         adj_gt = maxi[0].this.variable
@@ -149,7 +157,7 @@ def execute_query(request, user_id, type="A"):
 
         target_result = round(target_result, 1)
 
-        return assistant(request, type = type, query = query, message =f"Okay, I will set {maxi[0].that.actuator} to {target_result} {target_units}")
+        return assistant(request, typ = typ, user_id = user_id, query = query, message =f"Okay, I will set {maxi[0].that.actuator} to {target_result} {target_units}")
     
     # The request has been done to the "normal" assistant
     else:
@@ -166,9 +174,9 @@ def execute_query(request, user_id, type="A"):
 
         # If nothing good enough was found, unknown query, otherwise return matched query
         if mini[1] > 4:
-            return assistant(request, type = type, query = query, message = "Unknown query, please try with another wording.")
+            return assistant(request, typ = typ, user_id = user_id, query = query, message = "Unknown query, please try with another wording.")
 
         target_gt = mini[0].that.value
         target_units = mini[0].that.actuator.units
 
-        return assistant(request, type = type, query = query, message =f"Okay, I will set {mini[0].that.actuator} to {target_gt} {target_units}")
+        return assistant(request, typ = typ, user_id = user_id, query = query, message =f"Okay, I will set {mini[0].that.actuator} to {target_gt} {target_units}")
