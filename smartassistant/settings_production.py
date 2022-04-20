@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-gu4va7!h@ehy29smes*ekbgxf5-sgk5w&7xfeujbcnoyxulr&t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["colombmo.django.group"]
+ALLOWED_HOSTS = ["colombmo.django.group", "smartassistant.ga"]
 
 
 # Application definition
