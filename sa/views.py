@@ -2,7 +2,6 @@ from unicodedata import category
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render
 from sa.models import Actuator, This, That, Rule, User
 import uuid
 from util.precisiation import Precisiation
@@ -101,6 +100,7 @@ def execute_query(request, typ = "A", user_id=None):
         adj = ""
         
         for i,token in enumerate(tokens):
+            print(token.text, token.pos_)
             if ((token.tag_ in ["JJ", "JJR", "JJS", "PDT", "RB", "RBR", "RBS"] or 
                 (adj == "" and i == len(tokens)-1 and (nlp(token.text)[0].pos_ == "ADJ" or nlp(token.text)[0].pos_ == "ADV"))) and 
                 token.text not in ["here", "there", "in"]):
@@ -112,6 +112,8 @@ def execute_query(request, typ = "A", user_id=None):
         cat = p.get_category([adj])
         query_c = query.replace(adj, cat)
         encoded_query = model_sbert.encode(query_c)
+
+        print(encoded_query.shape)
 
         # Find best matching query, giving the priority to those with the same category
         maxi = ("", 0)
@@ -143,7 +145,14 @@ def execute_query(request, typ = "A", user_id=None):
         target_units = maxi[0].that.actuator.units
 
         prec_gt = p.precisiate_v2(adj_gt, cat_gt)
-        distmax = abs(2 * abs(target_gt-target_range[0]) - abs(target_range[1]-target_range[0]))
+
+        # Compute max distance between elements
+        #distmax = 4 / (1 + prec_gt[0]) * abs(target_gt - (target_range[0] + target_range[1]) / 2)
+        #distmax = 2 / (prec_gt[0]) * abs(target_gt - (target_range[0] + target_range[1]) / 2)
+        distmax = abs(target_range[1]-target_range[0])
+        #distmax = abs(2 * abs(target_gt-target_range[0]) - abs(target_range[1]-target_range[0]))
+
+        print(f"Distmax: {distmax}")
 
         if adj.lower() == "medium":
             prec = (0.5,)
@@ -152,8 +161,18 @@ def execute_query(request, typ = "A", user_id=None):
 
         dist = abs(prec[0]-prec_gt[0])*distmax
 
-        target_result = target_gt - dist if (target_gt - dist >= target_range[0] 
-            and target_gt - dist < target_range[1]) else target_gt + dist
+        # Choose direction based on the position of the gt wrt the mid
+        if prec_gt[0] >= 0.5:
+            sgn = -1
+        else:
+            sgn = 1
+
+        # Compute target result based on the distance between the different precisiated values, scaled to match the new scale
+        target_result = target_gt + sgn * dist if (target_gt + sgn * dist >= target_range[0] - abs(target_range[1]-target_range[0])*0.2
+            and target_gt + sgn * dist < target_range[1] + abs(target_range[1]-target_range[0])*0.2) else target_gt - sgn * dist
+
+        mi, ma = min(target_range[0], target_range[1]), max(target_range[0], target_range[1])
+        target_result = max(min(ma, target_result), mi)
 
         target_result = round(target_result, 1)
 
