@@ -16,23 +16,29 @@ $ cd smartassistant
 Create a virtual environment to install dependencies in and activate it:
 
 ```sh
-$ virtualenv2 --no-site-packages env
+$ virtualenv env
 $ source env/bin/activate
 ```
 
 Then install the dependencies:
 
 ```sh
-(env)$ pip install -r requirements.txt
+(env)$ pip3 install -r requirements.txt
 ```
 
 Note the `(env)` in front of the prompt. This indicates that this terminal
-session operates in a virtual environment set up by `virtualenv2`.
+session operates in a virtual environment set up by `virtualenv`.
 
-Once `pip` has finished downloading the dependencies:
+Once `pip` has finished downloading and installing the dependencies, you need to download the spacy model:
+
 ```sh
-(env)$ cd project
-(env)$ python manage.py runserver
+(env)$ python3 -m spacy download en_core_web_sm
+```
+
+Then, you can start the server:
+
+```sh
+(env)$ python3 manage.py runserver
 ```
 
 And navigate to:
